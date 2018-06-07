@@ -9,6 +9,8 @@ django-heroku = "*"
 flask = "*"
 sqlalchemy = "*"
 marshmallow = "*"
+flask-sqlalchemy = "*"
+flask-marshmallow = "*"
 
 [requires]
 python_version = "3.6"
