@@ -19,13 +19,29 @@ class User(db.Model):
         self.username = username
         self.email = email
 
+
 class UserSchema(ma.Schema):
     class Meta:
         # Fields to be exposed
         fields = ('username', 'email')
 
+
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
+
+
+class UserListResponseWrapper:
+    def __init__(self, users):
+        self.responseCode = "200"
+        self.message = "Success"
+        self.data = users
+
+    def serialize(self):
+        return {
+            'responseCode': self.responseCode,
+            'message': self.message,
+            'data': {'user_list': self.data}
+        }
 
 
 # endpoint to create new user
@@ -39,20 +55,24 @@ def add_User():
     db.session.add(new_user)
     db.session.commit()
 
-    return get_user()#jsonify(new_user)
+    return get_user()  # jsonify(new_user)
+
 
 # endpoint to show all users
 @app.route("/user", methods=["GET"])
 def get_user():
     all_users = User.query.all()
     result = users_schema.dump(all_users)
-    return jsonify(result.data)
+    wrapper = UserListResponseWrapper(result.data)
+    return jsonify(wrapper.serialize())
+
 
 # endpoint to get user detail by id
 @app.route("/user/<id>", methods=["GET"])
 def user_detail(id):
     user = User.query.get(id)
     return user_schema.jsonify(user)
+
 
 # endpoint to update user
 @app.route("/user/<id>", methods=["PUT"])
@@ -68,6 +88,7 @@ def user_update(id):
 
     return user_schema.jsonify(user)
 
+
 # endpoint to delete user
 @app.route("/user/<id>", methods=["DELETE"])
 def user_delete(id):
@@ -77,8 +98,6 @@ def user_delete(id):
 
     return user_schema.jsonify(user)
 
-if(__name__ == '__main__'):
+
+if (__name__ == '__main__'):
     app.run(debug=True)
-
-
-
